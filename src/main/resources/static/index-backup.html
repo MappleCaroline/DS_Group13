@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Search Engine</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input {
+            width: 65%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #results {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .result {
+            margin-bottom: 20px;
+        }
+
+        .result a {
+            color: #0066cc;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>My Search Engine</h1>
+        <p>Search for anything you want!</p>
+
+        <form id="searchForm">
+            <input type="text" id="keyword"
+                   placeholder="Enter a keyword..." required>
+            <button type="submit">Search</button>
+        </form>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById("searchForm")
+            .addEventListener("submit", async function(event) {
+                event.preventDefault();
+
+                const keyword =
+                    document.getElementById("keyword").value.trim();
+
+                const results = document.getElementById("results");
+                results.textContent = "Searching...";
+
+                try {
+                    const response = await fetch(
+                        "/api/search?query=" + encodeURIComponent(keyword)
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Search failed");
+                    }
+
+                    const data = await response.json();
+                    results.replaceChildren();
+
+                    if (Object.keys(data).length === 0) {
+                        results.textContent = "No results found.";
+                        return;
+                    }
+
+                    for (const [title, url] of Object.entries(data)) {
+                        const item = document.createElement("div");
+                        item.className = "result";
+
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.target = "_blank";
+                        link.rel = "noopener noreferrer";
+                        link.textContent = title;
+
+                        item.appendChild(link);
+                        results.appendChild(item);
+                    }
+
+                } catch (error) {
+                    results.textContent =
+                        "Search failed. Please try again.";
+                }
+            });
+    </script>
+</body>
+</html>
